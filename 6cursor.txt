@@ -1,0 +1,44 @@
+Write a PL/SQL block of code using Cursor that will give 5000 bonus to the
+employee whose salary is greater than 4000 and bonus of 1000 to the employee
+whose salary is less than 4000.
+Use Table Emp(eno,name,city,salary)
+
+
+mysql>>delimiter //
+
+mysql>
+
+CREATE PROCEDURE sal_cur()
+
+BEGIN
+DECLARE var_eno int;
+DECLARE var_sal int;
+DECLARE exit_loop BOOLEAN;
+
+DECLARE c1 CURSOR FOR SELECT eno, salary FROM emp;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET exit_loop = TRUE;
+
+OPEN c1;
+
+emp_loop: LOOP
+FETCH c1 INTO var_eno,var_sal;
+
+If var_sal > 4000 then
+Update emp set salary=var_sal+5000 where eno=var_eno;
+else
+Update emp set salary=var_sal+1000 where eno=var_eno;
+End If;
+
+IF exit_loop THEN
+CLOSE c1;
+LEAVE emp_loop;
+END IF;
+
+END LOOP emp_loop;
+END//
+
+
+mysql>> call sal_cur()//
+
+mysql>> select * from emp//
