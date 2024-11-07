@@ -1,0 +1,155 @@
+Create following tables using given schema and insert appropriate data into these tables.
+Student(StudID, Name, Address, Marks)
+Employee( EmplyeeID, Name, Address, Salary, DateOfJoining ,Department)
+Weather(CityID, CityName, MinTemp, MaxTemp) 2.
+Alter Student and Employee table to add Not Null constraint on all columns.
+Alter the Student table to add Primary key constraint on StudID column.
+Create a view JoiningInfo on Employee table displaying Employee ID, Name and
+DateOfJoining of employees.
+Crete index on primary key columns of all the tables.
+Crate view MarksInfo on Student table displaying StuID and Marks.
+Change the name of Weather table to WeatherData.
+Drop column CityName from WeatherData table.
+Add column Grade to Student table.
+Crate a view “DistinctionStudents” on student table displaying data of students having
+Distinction as Grade.
+Create a sequence on StudID in student table.
+Create a synonym ‘Emp_Info’ for Employee table
+
+
+
+
+
+1. Creating the Tables with Sample Data
+
+CREATE TABLE Student (
+    StudID INT,
+    Name VARCHAR(50),
+    Address VARCHAR(100),
+    Marks INT
+);
+
+CREATE TABLE Employee (
+    EmployeeID INT,
+    Name VARCHAR(50),
+    Address VARCHAR(100),
+    Salary DECIMAL(10, 2),
+    DateOfJoining DATE,
+    Department VARCHAR(50)
+);
+
+CREATE TABLE Weather (
+    CityID INT,
+    CityName VARCHAR(50),
+    MinTemp DECIMAL(5, 2),
+    MaxTemp DECIMAL(5, 2)
+);
+
+-- Insert sample data
+INSERT INTO Student (StudID, Name, Address, Marks) VALUES
+(1, 'Amit Kumar', 'Delhi', 85),
+(2, 'Sita Sharma', 'Mumbai', 75),
+(3, 'Rajesh Gupta', 'Chennai', 92),
+(4, 'Pooja Verma', 'Kolkata', 60);
+
+INSERT INTO Employee (EmployeeID, Name, Address, Salary, DateOfJoining, Department) VALUES
+(101, 'Ravi Singh', 'Delhi', 50000, '2022-06-15', 'IT'),
+(102, 'Sunita Mehta', 'Mumbai', 60000, '2023-02-20', 'Finance'),
+(103, 'Manoj Joshi', 'Chennai', 45000, '2021-10-01', 'HR');
+
+INSERT INTO Weather (CityID, CityName, MinTemp, MaxTemp) VALUES
+(1, 'Delhi', 10.5, 38.2),
+(2, 'Mumbai', 24.0, 34.0),
+(3, 'Chennai', 25.0, 36.5),
+(4, 'Kolkata', 18.0, 32.0);
+
+
+2. Alter Student and Employee Table to Add NOT NULL Constraints
+
+ALTER TABLE Student
+MODIFY StudID INT NOT NULL,
+MODIFY Name VARCHAR(50) NOT NULL,
+MODIFY Address VARCHAR(100) NOT NULL,
+MODIFY Marks INT NOT NULL;
+
+ALTER TABLE Employee
+MODIFY EmployeeID INT NOT NULL,
+MODIFY Name VARCHAR(50) NOT NULL,
+MODIFY Address VARCHAR(100) NOT NULL,
+MODIFY Salary DECIMAL(10, 2) NOT NULL,
+MODIFY DateOfJoining DATE NOT NULL,
+MODIFY Department VARCHAR(50) NOT NULL;
+
+
+3. Add Primary Key Constraint on StudID in Student Table
+
+ALTER TABLE Student
+ADD PRIMARY KEY (StudID);
+
+
+4. Create a View JoiningInfo on Employee Table
+
+CREATE VIEW JoiningInfo AS
+SELECT EmployeeID, Name, DateOfJoining
+FROM Employee;
+
+
+5.Create Index on Primary Key Columns of All Tables
+
+CREATE INDEX idx_student_studid ON Student(StudID);
+CREATE INDEX idx_employee_employeeid ON Employee(EmployeeID);
+CREATE INDEX idx_weather_cityid ON Weather(CityID);
+
+
+6. Create a View MarksInfo on Student Table
+
+CREATE VIEW MarksInfo AS
+SELECT StudID, Marks
+FROM Student;
+
+
+7. Rename Weather Table to WeatherData
+
+ALTER TABLE Weather RENAME TO WeatherData;
+
+
+8. Drop Column CityName from WeatherData Table
+
+ALTER TABLE WeatherData
+DROP COLUMN CityName;
+
+
+9. Add Column Grade to Student Table
+
+ALTER TABLE Student
+ADD Grade VARCHAR(20);
+
+
+10. Create a View DistinctionStudents on Student Table
+
+Updated Sample Data with Grades
+
+UPDATE Student
+SET Grade = 'Distinction' WHERE Marks >= 85;
+UPDATE Student
+SET Grade = 'First Class' WHERE Marks BETWEEN 60 AND 84;
+UPDATE Student
+SET Grade = 'Second Class' WHERE Marks < 60;
+
+
+CREATE VIEW DistinctionStudents AS
+SELECT StudID, Name, Marks, Grade
+FROM Student
+WHERE Grade = 'Distinction';
+
+
+11. Create a Sequence on StudID in Student Table
+
+ALTER TABLE Student
+MODIFY StudID INT AUTO_INCREMENT;
+
+
+12. Create a Synonym Emp_Info for Employee Table
+
+CREATE VIEW Emp_Info AS
+SELECT * FROM Employee;

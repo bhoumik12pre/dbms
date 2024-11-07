@@ -1,0 +1,123 @@
+Write a stored procedure for following scenario
+Consider Tables:
+1.Borrower(Roll_no, Name, DateofIssue, NameofBook, Status)
+2.Fine(Roll_no,Date,Amt)
+•Accept Roll_no and NameofBook from user.
+•Check the number of days (from date of issue).
+•If days are between 15 to 30 then fine amount will be Rs 5per day.
+•If no. of days>30, per day fine will be Rs 50 per day.
+•After submitting the book, status will change from I to R.
+•If condition of fine is true, then details will be stored into fine table.
+•Also handles the exception by named exception handler
+ or user define exception handler.
+
+
+Step 1: Create the Tables
+
+CREATE TABLE Borrower (
+    Roll_no INT,
+    Name VARCHAR(100),
+    DateofIssue DATE,
+    NameofBook VARCHAR(100),
+    Status CHAR(1),
+    PRIMARY KEY (Roll_no, NameofBook)
+);
+
+CREATE TABLE Fine (
+    Roll_no INT,
+    Date DATE,
+    Amt DECIMAL(10, 2)
+);
+
+
+Step 2: Create the Stored Procedure
+
+
+DELIMITER //
+
+CREATE PROCEDURE CalculateFineAndReturnBook(IN p_Roll_no INT, IN p_NameofBook VARCHAR(100))
+BEGIN
+    DECLARE v_DateOfIssue DATE;
+    DECLARE v_Status CHAR(1);
+    DECLARE v_Days INT;
+    DECLARE v_FineAmt DECIMAL(10, 2);
+    
+    -- Named exception handler for when no record is found
+    DECLARE CONTINUE HANDLER FOR NOT FOUND
+    BEGIN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'No matching record found for the given Roll_no and NameofBook.';
+    END;
+    
+    -- Initialize variables
+    SET v_FineAmt = 0;
+    
+    -- Fetch DateOfIssue and Status of the book
+    SELECT DateofIssue, Status INTO v_DateOfIssue, v_Status
+    FROM Borrower
+    WHERE Roll_no = p_Roll_no AND NameofBook = p_NameofBook;
+
+    -- Check if the book is already returned
+    IF v_Status = 'R' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'The book is already returned.';
+    ELSE
+        -- Calculate the number of days since DateOfIssue
+        SET v_Days = DATEDIFF(CURDATE(), v_DateOfIssue);
+        
+        -- Determine fine amount based on days
+        IF v_Days BETWEEN 15 AND 30 THEN
+            SET v_FineAmt = v_Days * 5;
+        ELSEIF v_Days > 30 THEN
+            SET v_FineAmt = v_Days * 50;
+        END IF;
+        
+        -- Update the book status to "Returned" (R)
+        UPDATE Borrower
+        SET Status = 'R'
+        WHERE Roll_no = p_Roll_no AND NameofBook = p_NameofBook;
+        
+        -- If there is a fine, insert it into the Fine table
+        IF v_FineAmt > 0 THEN
+            INSERT INTO Fine (Roll_no, Date, Amt)
+            VALUES (p_Roll_no, CURDATE(), v_FineAmt);
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+
+
+Step 3: Test the Procedure with Sample Data
+
+1. Insert Sample Data:
+
+INSERT INTO Borrower (Roll_no, Name, DateofIssue, NameofBook, Status) VALUES
+(101, 'Ravi Kumar', '2023-09-01', 'Database Systems', 'I'),
+(102, 'Sita Patel', '2023-10-01', 'Operating Systems', 'I'),
+(103, 'Amit Singh', '2023-10-15', 'Data Structures', 'I'),
+(104, 'Neha Sharma', '2023-08-10', 'Algorithms', 'I'),
+(105, 'Anil Verma', '2023-07-25', 'Computer Networks', 'I'),
+(106, 'Priya Joshi', '2023-09-20', 'Software Engineering', 'I'),
+(107, 'Vikram Chawla', '2023-08-28', 'Artificial Intelligence', 'I'),
+(108, 'Sneha Desai', '2023-07-15', 'Machine Learning', 'I'),
+(109, 'Rajesh Gupta', '2023-09-05', 'Big Data', 'I'),
+(110, 'Lakshmi Nair', '2023-08-01', 'Cyber Security', 'I');
+
+2. Call the Procedure:
+
+CALL CalculateFineAndReturnBook(101, 'Database Systems');
+
+
+Step 4: Check Results
+
+1. Check Borrower Table:
+
+SELECT * FROM Borrower WHERE Roll_no = 101 AND NameofBook = 'Database Systems';
+
+
+2. Check Fine Table:
+
+SELECT * FROM Fine WHERE Roll_no = 101;
+
+

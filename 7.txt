@@ -1,0 +1,103 @@
+Write a database trigger on WorkCenters table. The System should keep track of the
+records that are being inserted. The capacity of work inserted in WorkCenters table
+should be reflected in WorkCenterStats table as a total capacity
+
+Step 1: Create the WorkCenters Table
+
+CREATE TABLE WorkCenters (
+    workcenter_id INT PRIMARY KEY,
+    workcenter_name VARCHAR(100),
+    capacity INT
+);
+
+
+
+Step 2: Create the WorkCenterStats Table
+
+CREATE TABLE WorkCenterStats (
+    stat_id INT PRIMARY KEY AUTO_INCREMENT,
+    total_capacity INT
+);
+
+
+Step 3: Insert Initial Data (for testing)
+
+-- Inserting initial data into WorkCenterStats table
+INSERT INTO WorkCenterStats (total_capacity) VALUES (0);  -- Initial total capacity
+
+-- Inserting initial data into WorkCenters table
+INSERT INTO WorkCenters (workcenter_id, workcenter_name, capacity) VALUES
+(1, 'Assembly Line', 100),
+(2, 'Packaging Line', 150);
+
+
+Step 4: Write the Trigger to Track Inserts and Update total_capacity
+
+DELIMITER //
+
+CREATE TRIGGER update_capacity_after_insert
+AFTER INSERT ON WorkCenters
+FOR EACH ROW
+BEGIN
+    DECLARE current_capacity INT;
+    
+    -- Get the current total capacity from the WorkCenterStats table
+    SELECT total_capacity INTO current_capacity FROM WorkCenterStats WHERE stat_id = 1;
+    
+    -- Update the total capacity in the WorkCenterStats table
+    UPDATE WorkCenterStats
+    SET total_capacity = current_capacity + NEW.capacity
+    WHERE stat_id = 1;
+END //
+
+DELIMITER ;
+
+
+Step 5: Explanation of the Trigger
+
+Trigger Type: This is an AFTER INSERT trigger, meaning it will execute after a new record is inserted into the WorkCenters table.
+
+FOR EACH ROW: The trigger will run once for each row that is inserted.
+
+Declare Variables: The trigger declares a variable current_capacity to store the current total capacity value from the WorkCenterStats table.
+
+SELECT INTO: The SELECT INTO statement retrieves the current total capacity from the WorkCenterStats table.
+
+UPDATE: The UPDATE statement updates the total_capacity by adding the capacity of the newly inserted work center (NEW.capacity) to the existing total_capacity in the WorkCenterStats table.
+
+
+Step 6: Insert New WorkCenter Record (to Trigger the Update)
+
+
+-- Insert a new work center, which will trigger the capacity update
+INSERT INTO WorkCenters (workcenter_id, workcenter_name, capacity) VALUES
+(3, 'Welding Line', 200);
+
+
+Step 7: Verify the Updated Capacity
+After inserting the new work center, we can check the updated total_capacity in the WorkCenterStats table:
+
+SELECT * FROM WorkCenterStats;
+
+
+
+Initial Data:
+
+WorkCenters:
+
+Assembly Line (capacity: 100)
+Packaging Line (capacity: 150)
+WorkCenterStats:
+
+Total Capacity: 0 (initial value)
+After Insert (Welding Line with capacity 200):
+
+WorkCenters:
+
+Assembly Line (capacity: 100)
+Packaging Line (capacity: 150)
+Welding Line (capacity: 200)
+WorkCenterStats:
+
+Total Capacity: 450 (100 + 150 + 200)
+This confirms that the trigger is working as expected, and it is updating the total capacity in the WorkCenterStats table whenever a new record is inserted into the WorkCenters table.

@@ -1,0 +1,115 @@
+Implement the following MongoDb Query
+1. Create a collection named books.
+2. Insert 5 records with field TITLE,DESCRIPTION,BY,URL,TAGS AND LIKES
+3. Insert 1 more document in collection with additional field of user name and comments.
+4. Display all the documents written by 'john' or whose title is 'mongodb'.
+5. Display all the documents whose like is greater than 150..
+6. Update the title of 'mongodb' document to 'mongodb overview'
+7. Display exactly two documents written by 'j
+
+
+Step 1: Create a Collection Named books
+
+mongosh
+
+use library;  // Switch to (or create) the 'library' database
+db.createCollection("books");
+
+
+Step 2: Insert 5 Records with Fields TITLE, DESCRIPTION, BY, URL, TAGS, and LIKES
+
+db.books.insertMany([
+    {
+        "TITLE": "MongoDB Basics",
+        "DESCRIPTION": "Introduction to MongoDB",
+        "BY": "john",
+        "URL": "http://example.com/mongodb-basics",
+        "TAGS": ["database", "NoSQL", "MongoDB"],
+        "LIKES": 120
+    },
+    {
+        "TITLE": "Node.js Guide",
+        "DESCRIPTION": "Learn Node.js from scratch",
+        "BY": "doe",
+        "URL": "http://example.com/nodejs-guide",
+        "TAGS": ["programming", "Node.js", "JavaScript"],
+        "LIKES": 200
+    },
+    {
+        "TITLE": "Python for Data Science",
+        "DESCRIPTION": "A comprehensive guide to Data Science",
+        "BY": "alice",
+        "URL": "http://example.com/python-data-science",
+        "TAGS": ["data science", "Python", "Machine Learning"],
+        "LIKES": 180
+    },
+    {
+        "TITLE": "MongoDB Guide",
+        "DESCRIPTION": "Advanced MongoDB concepts",
+        "BY": "john",
+        "URL": "http://example.com/mongodb-guide",
+        "TAGS": ["MongoDB", "database", "NoSQL"],
+        "LIKES": 90
+    },
+    {
+        "TITLE": "JavaScript Basics",
+        "DESCRIPTION": "Getting started with JavaScript",
+        "BY": "jane",
+        "URL": "http://example.com/javascript-basics",
+        "TAGS": ["JavaScript", "programming", "frontend"],
+        "LIKES": 250
+    }
+]);
+
+
+Step 3: Insert 1 More Document with an Additional Field (user_name and comments)
+
+db.books.insertOne({
+    "TITLE": "Advanced MongoDB",
+    "DESCRIPTION": "In-depth MongoDB tutorial",
+    "BY": "sam",
+    "URL": "http://example.com/advanced-mongodb",
+    "TAGS": ["MongoDB", "database", "NoSQL"],
+    "LIKES": 130,
+    "user_name": "sam123",
+    "comments": "This is an excellent tutorial for advanced users."
+});
+
+
+Step 4: Display All Documents Written by 'john' or Whose Title is 'mongodb'
+
+db.books.find({
+    $or: [
+        { "BY": "john" },
+        { "TITLE": { $regex: /^mongodb/i } }
+    ]
+});
+
+
+Step 5: Display All Documents with LIKES Greater Than 150
+
+
+db.books.find({ "LIKES": { $gt: 150 } });
+
+
+Step 6: Update the Title of the Document with Title 'mongodb' to 'mongodb overview'
+
+db.books.updateOne(
+    { "TITLE": "MongoDB Guide" },
+    { $set: { "TITLE": "MongoDB Overview" } }
+);
+
+
+Step 7: Display Exactly Two Documents Written by 'j'
+
+db.books.find({ "BY": /^j/ }).limit(2);
+
+
+
+Explanation of Queries
+Creating the collection – The collection is created when documents are first inserted.
+Inserting documents – insertMany is used to insert multiple documents, and insertOne for an individual record with additional fields.
+Query for authors or titles – The $or operator is used to find documents either authored by "john" or with a title containing "mongodb."
+Likes filter – The $gt operator finds documents with LIKES greater than 150.
+Updating a title – The updateOne function modifies a document's title.
+Limit on query results – The limit function restricts the result to exactly two matching documents.

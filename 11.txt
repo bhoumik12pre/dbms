@@ -1,0 +1,88 @@
+Consider the given relational table:
+Employee(Emp_No,Emp_Name,Designation,City,Salary,Zipcode,County)
+1. Creates a sequence used to generate employee numbers for the empno column of
+the emp table.
+2. Create an Index on county.
+3. Find the zip code whose county = 071 and check whether the query uses the Index and
+write your observation.
+4. Create a view for employees having salary <50000 and stays in 'Mumbai'
+
+
+Step 1: Create the Employee Table
+
+CREATE TABLE Employee (
+    Emp_No INT PRIMARY KEY,
+    Emp_Name VARCHAR(100),
+    Designation VARCHAR(100),
+    City VARCHAR(50),
+    Salary DECIMAL(10, 2),
+    Zipcode VARCHAR(10),
+    County VARCHAR(50)
+);
+
+
+Step 2: Create a Sequence for Emp_No
+
+-- Method 1: Using AUTO_INCREMENT
+CREATE TABLE Employee (
+    Emp_No INT AUTO_INCREMENT PRIMARY KEY,
+    Emp_Name VARCHAR(100),
+    Designation VARCHAR(100),
+    City VARCHAR(50),
+    Salary DECIMAL(10, 2),
+    Zipcode VARCHAR(10),
+    County VARCHAR(50)
+);
+
+-- Method 2: Using a Helper Table (for platforms that don't support sequences)
+CREATE TABLE emp_seq (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY);
+
+-- To use the helper table to insert an Emp_No
+INSERT INTO emp_seq (id) VALUES (NULL);
+SET @Emp_No = LAST_INSERT_ID();
+
+
+-- Insert data into Employee table
+INSERT INTO Employee (Emp_No, Emp_Name, Designation, City, Salary, Zipcode, County) VALUES
+(1, 'Amit Kumar', 'Manager', 'Mumbai', 48000, '400001', '071'),
+(2, 'Suman Gupta', 'Analyst', 'Delhi', 55000, '110001', '072'),
+(3, 'Rajesh Verma', 'Executive', 'Pune', 30000, '411001', '073'),
+(4, 'Priya Singh', 'Consultant', 'Mumbai', 45000, '400002', '071'),
+(5, 'Ravi Shah', 'Developer', 'Bangalore', 60000, '560001', '074'),
+(6, 'Neha Mehta', 'Analyst', 'Mumbai', 47000, '400003', '071'),
+(7, 'Manoj Desai', 'Manager', 'Chennai', 65000, '600001', '075'),
+(8, 'Sunita Rao', 'Executive', 'Mumbai', 25000, '400004', '071'),
+(9, 'Deepak Sharma', 'Consultant', 'Delhi', 50000, '110002', '072'),
+(10, 'Karan Joshi', 'Developer', 'Pune', 42000, '411002', '073'),
+(11, 'Anjali Nair', 'Manager', 'Mumbai', 48000, '400005', '071'),
+(12, 'Rahul Mishra', 'Analyst', 'Kolkata', 52000, '700001', '076'),
+(13, 'Lakshmi Iyer', 'Consultant', 'Mumbai', 30000, '400006', '071'),
+(14, 'Vikas Khanna', 'Developer', 'Delhi', 46000, '110003', '072'),
+(15, 'Simran Chawla', 'Executive', 'Pune', 40000, '411003', '073');
+
+
+Step 3: Create an Index on County
+Creating an index on County will improve query performance for searches based on this column.
+
+CREATE INDEX idx_county ON Employee(County);
+
+
+Step 4: Query to Find the Zip Code for County = '071'
+
+EXPLAIN SELECT Zipcode FROM Employee WHERE County = '071';
+
+
+Step 5: Create a View for Employees with Salary < 50000 and City = 'Mumbai'
+
+CREATE VIEW Mumbai_Low_Salary_Employees AS
+SELECT 
+    Emp_No, Emp_Name, Designation, City, Salary, Zipcode, County
+FROM 
+    Employee
+WHERE 
+    Salary < 50000 AND City = 'Mumbai';
+
+
+SELECT * FROM Mumbai_Low_Salary_Employees;
+
+

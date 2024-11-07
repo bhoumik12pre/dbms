@@ -1,0 +1,101 @@
+Write a PL/SQL block of code using Cursor that will give 5000 bonus to the employee
+whose salary is greater than 4000 and bonus of 1000 to the employee whose salary is less
+than 4000.
+Use Table : Emp (eno,name,city,salary)
+
+
+Step 1: Create the Emp Table
+First, create the Emp table with the necessary columns:
+
+CREATE TABLE Emp (
+    eno INT PRIMARY KEY,
+    name VARCHAR(50),
+    city VARCHAR(50),
+    salary INT
+);
+
+
+
+Step 2: Insert Sample Data
+Insert some sample data into the Emp table for testing:
+
+INSERT INTO Emp (eno, name, city, salary) VALUES
+(1, 'Amit Kumar', 'Mumbai', 3500),
+(2, 'Priya Sharma', 'Delhi', 4500),
+(3, 'Rahul Verma', 'Kolkata', 4200),
+(4, 'Sneha Reddy', 'Bangalore', 3800),
+(5, 'Vijay Singh', 'Hyderabad', 3000),
+(6, 'Rina Patel', 'Ahmedabad', 5500),
+(7, 'Anil Gupta', 'Chennai', 2800),
+(8, 'Shalini Desai', 'Pune', 6000),
+(9, 'Deepak Chauhan', 'Jaipur', 3900),
+(10, 'Neha Joshi', 'Lucknow', 4800);
+
+
+
+
+Step 3: Write the PL/SQL Block Using Cursor
+
+
+DELIMITER //
+
+CREATE PROCEDURE GiveBonus()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_eno INT;
+    DECLARE v_name VARCHAR(50);
+    DECLARE v_salary INT;
+    DECLARE v_bonus INT;
+
+    -- Cursor to fetch employee details
+    DECLARE emp_cursor CURSOR FOR 
+        SELECT eno, name, salary FROM Emp;
+
+    -- Handler for when there are no more rows in the cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Open the cursor
+    OPEN emp_cursor;
+
+    -- Loop through the cursor to process each employee
+    read_loop: LOOP
+        -- Fetch employee details into variables
+        FETCH emp_cursor INTO v_eno, v_name, v_salary;
+
+        -- Exit the loop if no more rows are available
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Determine the bonus based on the salary
+        IF v_salary > 4000 THEN
+            SET v_bonus = 5000;  -- Bonus for salary greater than 4000
+        ELSE
+            SET v_bonus = 1000;  -- Bonus for salary less than or equal to 4000
+        END IF;
+
+        -- Update the employee salary with the bonus
+        UPDATE Emp
+        SET salary = salary + v_bonus
+        WHERE eno = v_eno;
+
+        -- Optionally, display a message
+        SELECT CONCAT('Employee ', v_name, ' with ID ', v_eno, ' received a bonus of ', v_bonus) AS message;
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE emp_cursor;
+END //
+
+DELIMITER ;
+
+
+Step 4: Execute the Stored Procedure
+After creating the procedure, call it with the following SQL command:
+
+CALL GiveBonus();
+
+
+SELECT * FROM Emp;
+
+

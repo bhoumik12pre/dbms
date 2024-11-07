@@ -1,0 +1,141 @@
+Consider the given database schema:
+Student(Student_Id,Student_Name,Instructor_Id,Student_City)
+Instructor(Instructor_Id,Instructor_Name,Instructor_City,Specialization)
+1. Find the instructor of each student.
+2. Find the student who is not having any instructor.
+3. Find the student who is not having any instructor as well as instructor who is not
+having student.
+4. Find the students whose instructor’s specialization is computer.
+5. Create a view containing total number of students whose instructor belongs to “Pune”.
+
+
+Step 1: Create the Tables
+
+-- Create Student table
+CREATE TABLE Student (
+    Student_Id INT PRIMARY KEY,
+    Student_Name VARCHAR(100),
+    Instructor_Id INT,
+    Student_City VARCHAR(100)
+);
+
+-- Create Instructor table
+CREATE TABLE Instructor (
+    Instructor_Id INT PRIMARY KEY,
+    Instructor_Name VARCHAR(100),
+    Instructor_City VARCHAR(100),
+    Specialization VARCHAR(100)
+);
+
+
+Step 2: Insert Sample Data
+
+-- Insert data into Instructor table
+INSERT INTO Instructor (Instructor_Id, Instructor_Name, Instructor_City, Specialization) VALUES
+(1, 'Dr. Sharma', 'Pune', 'computer'),
+(2, 'Prof. Gupta', 'Delhi', 'mathematics'),
+(3, 'Dr. Verma', 'Mumbai', 'physics'),
+(4, 'Prof. Rao', 'Pune', 'computer'),
+(5, 'Dr. Iyer', 'Chennai', 'biology');
+
+-- Insert data into Student table
+INSERT INTO Student (Student_Id, Student_Name, Instructor_Id, Student_City) VALUES
+(101, 'Aarav Singh', 1, 'Pune'),
+(102, 'Riya Mehta', 2, 'Delhi'),
+(103, 'Krishna Patel', NULL, 'Ahmedabad'),
+(104, 'Sneha Kapoor', 4, 'Pune'),
+(105, 'Ishaan Agarwal', 3, 'Mumbai'),
+(106, 'Vani Nair', NULL, 'Chennai');
+
+
+Step 3: Queries for Each Requirement
+
+1. Find the instructor of each student.
+
+SELECT 
+    Student.Student_Id,
+    Student.Student_Name,
+    Instructor.Instructor_Name AS Instructor
+FROM 
+    Student
+JOIN 
+    Instructor ON Student.Instructor_Id = Instructor.Instructor_Id;
+
+
+2. Find the student who is not having any instructor.
+This query finds students whose Instructor_Id is NULL.
+
+SELECT 
+    Student.Student_Id,
+    Student.Student_Name
+FROM 
+    Student
+LEFT JOIN 
+    Instructor ON Student.Instructor_Id = Instructor.Instructor_Id
+WHERE 
+    Instructor.Instructor_Id IS NULL;
+
+
+3. Find the student who is not having any instructor as well as instructors who are not having students.
+This query finds both students without instructors and instructors without students, using two separate LEFT JOIN queries with UNION.
+
+-- Students without instructors
+SELECT 
+    Student.Student_Id AS ID,
+    Student.Student_Name AS Name,
+    'No Instructor' AS Type
+FROM 
+    Student
+LEFT JOIN 
+    Instructor ON Student.Instructor_Id = Instructor.Instructor_Id
+WHERE 
+    Instructor.Instructor_Id IS NULL
+
+UNION
+
+-- Instructors without students
+SELECT 
+    Instructor.Instructor_Id AS ID,
+    Instructor.Instructor_Name AS Name,
+    'No Student' AS Type
+FROM 
+    Instructor
+LEFT JOIN 
+    Student ON Student.Instructor_Id = Instructor.Instructor_Id
+WHERE 
+    Student.Student_Id IS NULL;
+
+
+4. Find the students whose instructor’s specialization is "computer".
+
+SELECT 
+    Student.Student_Id,
+    Student.Student_Name,
+    Instructor.Specialization
+FROM 
+    Student
+JOIN 
+    Instructor ON Student.Instructor_Id = Instructor.Instructor_Id
+WHERE 
+    Instructor.Specialization = 'computer';
+
+
+5. Create a view containing the total number of students whose instructor belongs to “Pune”.
+This view counts students whose instructors are based in Pune.
+
+CREATE VIEW Pune_Instructor_Student_Count AS
+SELECT 
+    Instructor.Instructor_City,
+    COUNT(Student.Student_Id) AS Total_Students
+FROM 
+    Student
+JOIN 
+    Instructor ON Student.Instructor_Id = Instructor.Instructor_Id
+WHERE 
+    Instructor.Instructor_City = 'Pune'
+GROUP BY 
+    Instructor.Instructor_City;
+
+
+SELECT * FROM Pune_Instructor_Student_Count;
+

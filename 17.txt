@@ -1,0 +1,140 @@
+Create the collection books having the following fields TITLE, DESCRIPTION, AUTHOR,
+URL, TAGS AND LIKES.
+ Implement the following Aggregation and Indexing Queries
+ 1. Find the number of books published author john.
+ 2. Find books which have minimum likes and maximum likes published author john.
+ 3. Find the average number of likes of the books published author john.
+ 4. Find the first and last book published author john..
+ 5. Create an index on author name.
+Display the books published author john and check if it uses the index which we have
+created
+
+
+Step 1: Create the Collection books
+
+
+use library; // Switch to the 'library' database (or create it if it doesn't exist)
+
+db.createCollection("books"); // Explicitly create the collection
+
+
+
+Step 2: Insert Sample Data
+We will insert 5 sample books into the books collection:
+
+
+db.books.insertMany([
+    {
+        "TITLE": "MongoDB Basics",
+        "DESCRIPTION": "Introduction to MongoDB",
+        "AUTHOR": "john",
+        "URL": "http://example.com/mongodb-basics",
+        "TAGS": ["database", "NoSQL", "MongoDB"],
+        "LIKES": 120
+    },
+    {
+        "TITLE": "Node.js Guide",
+        "DESCRIPTION": "Learn Node.js from scratch",
+        "AUTHOR": "doe",
+        "URL": "http://example.com/nodejs-guide",
+        "TAGS": ["programming", "Node.js", "JavaScript"],
+        "LIKES": 200
+    },
+    {
+        "TITLE": "MongoDB Guide",
+        "DESCRIPTION": "Advanced MongoDB concepts",
+        "AUTHOR": "john",
+        "URL": "http://example.com/mongodb-guide",
+        "TAGS": ["MongoDB", "database", "NoSQL"],
+        "LIKES": 90
+    },
+    {
+        "TITLE": "JavaScript Essentials",
+        "DESCRIPTION": "Essential JavaScript for beginners",
+        "AUTHOR": "alice",
+        "URL": "http://example.com/javascript-essentials",
+        "TAGS": ["JavaScript", "programming"],
+        "LIKES": 250
+    },
+    {
+        "TITLE": "MongoDB Overview",
+        "DESCRIPTION": "Overview of MongoDB architecture",
+        "AUTHOR": "john",
+        "URL": "http://example.com/mongodb-overview",
+        "TAGS": ["NoSQL", "MongoDB", "database"],
+        "LIKES": 150
+    }
+]);
+
+
+Step 3: Implement Aggregation and Indexing Queries
+
+
+1. Find the number of books published by author 'john':
+You can use the countDocuments() method to count the number of books written by 'john':
+
+db.books.countDocuments({ "AUTHOR": "john" });
+
+
+2. Find books which have minimum and maximum likes published by author 'john':
+
+db.books.aggregate([
+    { $match: { "AUTHOR": "john" } }, // Filter books by author 'john'
+    { $group: { 
+        _id: null, 
+        minLikes: { $min: "$LIKES" }, 
+        maxLikes: { $max: "$LIKES" } 
+    }}
+]);
+
+
+3. Find the average number of likes of the books published by author 'john':
+
+
+db.books.aggregate([
+    { $match: { "AUTHOR": "john" } }, // Filter books by author 'john'
+    { $group: { _id: null, avgLikes: { $avg: "$LIKES" } } }
+]);
+
+
+4. Find the first and last book published by author 'john':
+To get the first and last book, we can use $sort and $limit:
+
+
+// First book published by 'john'
+db.books.aggregate([
+    { $match: { "AUTHOR": "john" } },
+    { $sort: { "TITLE": 1 } }, // Sort by title or by any other field to determine the order
+    { $limit: 1 }
+]);
+
+// Last book published by 'john'
+db.books.aggregate([
+    { $match: { "AUTHOR": "john" } },
+    { $sort: { "TITLE": -1 } }, // Sort in reverse order to get the last one
+    { $limit: 1 }
+]);
+
+
+5. Create an index on the AUTHOR field:
+
+To create an index on the AUTHOR field, you can use the createIndex function:
+
+db.books.createIndex({ "AUTHOR": 1 }); // Creates an ascending index on the 'AUTHOR' field
+
+
+6. Display the books published by 'john' and check if the index is used:
+To check if the index is being used, we can run the query and explain the plan:
+
+
+db.books.find({ "AUTHOR": "john" }).explain("executionStats");
+
+
+
+Summary of Queries
+Count documents – Use countDocuments to find how many books are written by 'john'.
+Min/Max Likes – Use the $min and $max aggregation operators to get the books with the minimum and maximum likes for 'john'.
+Average Likes – Use $avg to find the average likes of books by 'john'.
+First and Last Book – Use $sort to order the documents and $limit to find the first and last book by 'john'.
+Create Index – Use createIndex to create an index on the AUTHOR field for faster lookups.
+Explain the Query – Use explain("executionStats") to check if the index is being used in the query.

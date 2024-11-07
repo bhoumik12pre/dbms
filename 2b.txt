@@ -1,0 +1,106 @@
+Create the Employee table using following schema
+Employee (Employee_id, First_name, Last_name, Salary, Joining_date, Department,)
+1. Insert 10 to 15 appropriate records in the Employee table.
+2. Get First_Name,Last_Name from employee table
+3. Get unique DEPARTMENT from employee table
+4. Get FIRST_NAME ,Joining year,Joining Month and Joining Date from employee table
+Select FIRST_NAME, year(joining_date),month(joining_date), DAY(joining_date) from
+EMPLOYEE
+5. Get all employee details from the employee table order by Salary Ascending
+6. Get all employee details from the employee table whose First_Name starts with A.
+7. Update the Salary column by incrementing salary of all employees having salary less
+than 20000 by 5000.
+8. Delete the department of employee no 004.
+9. Find department wise minimum salary.
+10. Find department wise Average salary in ascending order. 
+
+
+1. Create the Employee Table
+
+CREATE TABLE Employee (
+    Employee_id INT PRIMARY KEY,
+    First_name VARCHAR(50),
+    Last_name VARCHAR(50),
+    Salary DECIMAL(10, 2),
+    Joining_date DATE,
+    Department VARCHAR(50)
+);
+
+
+2. Insert Sample Records in the Employee Table
+
+INSERT INTO Employee (Employee_id, First_name, Last_name, Salary, Joining_date, Department) VALUES
+(1, 'Amit', 'Kumar', 18000, '2021-01-15', 'IT'),
+(2, 'Sita', 'Sharma', 25000, '2020-06-10', 'Finance'),
+(3, 'Rajesh', 'Gupta', 22000, '2019-07-20', 'IT'),
+(4, 'Anil', 'Mishra', 15000, '2022-03-18', 'HR'),
+(5, 'Pooja', 'Verma', 30000, '2023-02-12', 'Marketing'),
+(6, 'Ravi', 'Patel', 28000, '2021-11-25', 'Finance'),
+(7, 'Sunita', 'Mehta', 19000, '2020-08-01', 'HR'),
+(8, 'Kiran', 'Joshi', 22000, '2018-05-14', 'Marketing'),
+(9, 'Aman', 'Yadav', 35000, '2023-06-10', 'IT'),
+(10, 'Anita', 'Rao', 16000, '2022-09-30', 'Sales'),
+(11, 'Vikram', 'Singh', 28000, '2021-04-22', 'Sales'),
+(12, 'Ayesha', 'Khan', 20000, '2020-12-09', 'Finance'),
+(13, 'Gaurav', 'Pandey', 18000, '2019-10-17', 'IT'),
+(14, 'Aditi', 'Desai', 32000, '2023-01-05', 'HR'),
+(15, 'Manish', 'Thakur', 40000, '2022-07-19', 'Finance');
+
+
+2. Get First_Name, Last_Name from Employee table
+
+SELECT First_name, Last_name FROM Employee;
+
+
+3. Get Unique Department from Employee table
+
+SELECT DISTINCT Department FROM Employee;
+
+
+
+4. Get First_name, Joining Year, Joining Month, and Joining Date from Employee table
+
+SELECT First_name, YEAR(Joining_date) AS Joining_Year, MONTH(Joining_date) AS Joining_Month, DAY(Joining_date) AS Joining_Day
+FROM Employee;
+
+
+5. Get All Employee Details Ordered by Salary in Ascending Order
+
+SELECT * FROM Employee
+ORDER BY Salary ASC;
+
+
+6. Get All Employee Details Where First_name Starts with "A"
+
+SELECT * FROM Employee
+WHERE First_name LIKE 'A%';
+
+
+7. Update Salary for Employees with Salary Less Than 20000 by Incrementing by 5000
+
+UPDATE Employee
+SET Salary = Salary + 5000
+WHERE Salary < 20000;
+
+
+8. Delete the Department of Employee with Employee_id = 4
+
+UPDATE Employee
+SET Department = NULL
+WHERE Employee_id = 4;
+
+
+9. Find Department-Wise Minimum Salary
+
+SELECT Department, MIN(Salary) AS Min_Salary
+FROM Employee
+GROUP BY Department;
+
+
+10. Find Department-Wise Average Salary in Ascending Order
+
+SELECT Department, AVG(Salary) AS Avg_Salary
+FROM Employee
+GROUP BY Department
+ORDER BY Avg_Salary ASC;
+

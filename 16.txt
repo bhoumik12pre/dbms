@@ -1,0 +1,136 @@
+Implement the following MongoDb Query
+ 1. Create a collection named books.
+ 2. Insert 5 records with field TITLE,DESCRIPTION,BY,URL,TAGS AND LIKES
+ 3. Insert 1 more document in collection with additional field of user name and
+comments.
+ 4. Display all the documents whose title is 'mongodb'.
+ 5. Display all the documents whose title is 'mongodb' and written by 'john'.
+ 6. Display all the documents whose like is greater than 100 and whose title is either
+'mongodb' or written by 'john'.
+ 7. Delete the document titled 'nosql overview'.
+ 8. Display the second document published by 'john'.
+ 9. Update the Author of TOC book to Vivek Kulkarni, if record does not exist new
+document should create
+
+
+Step 1: Create the Collection Named books
+
+use library;  // Switch to the 'library' database (or create it if it doesn't exist)
+db.createCollection("books");
+
+
+Step 2: Insert 5 Records with Fields TITLE, DESCRIPTION, BY, URL, TAGS, and LIKES
+
+db.books.insertMany([
+    {
+        "TITLE": "MongoDB Basics",
+        "DESCRIPTION": "Introduction to MongoDB",
+        "BY": "john",
+        "URL": "http://example.com/mongodb-basics",
+        "TAGS": ["database", "NoSQL", "MongoDB"],
+        "LIKES": 120
+    },
+    {
+        "TITLE": "Node.js Guide",
+        "DESCRIPTION": "Learn Node.js from scratch",
+        "BY": "doe",
+        "URL": "http://example.com/nodejs-guide",
+        "TAGS": ["programming", "Node.js", "JavaScript"],
+        "LIKES": 200
+    },
+    {
+        "TITLE": "Python for Data Science",
+        "DESCRIPTION": "A comprehensive guide to Data Science",
+        "BY": "alice",
+        "URL": "http://example.com/python-data-science",
+        "TAGS": ["data science", "Python", "Machine Learning"],
+        "LIKES": 180
+    },
+    {
+        "TITLE": "MongoDB Guide",
+        "DESCRIPTION": "Advanced MongoDB concepts",
+        "BY": "john",
+        "URL": "http://example.com/mongodb-guide",
+        "TAGS": ["MongoDB", "database", "NoSQL"],
+        "LIKES": 90
+    },
+    {
+        "TITLE": "JavaScript Basics",
+        "DESCRIPTION": "Getting started with JavaScript",
+        "BY": "jane",
+        "URL": "http://example.com/javascript-basics",
+        "TAGS": ["JavaScript", "programming", "frontend"],
+        "LIKES": 250
+    }
+]);
+
+
+Step 3: Insert 1 More Document with an Additional Field (user_name and comments)
+
+db.books.insertOne({
+    "TITLE": "Advanced MongoDB",
+    "DESCRIPTION": "In-depth MongoDB tutorial",
+    "BY": "sam",
+    "URL": "http://example.com/advanced-mongodb",
+    "TAGS": ["MongoDB", "database", "NoSQL"],
+    "LIKES": 130,
+    "user_name": "sam123",
+    "comments": "This is an excellent tutorial for advanced users."
+});
+
+
+Step 4: Display All the Documents Whose Title is 'mongodb'
+
+db.books.find({ "TITLE": "mongodb" });
+
+
+Step 5: Display All the Documents Whose Title is 'mongodb' and Written by 'john'
+
+db.books.find({ "TITLE": "mongodb", "BY": "john" });
+
+
+Step 6: Display All the Documents Whose LIKES is Greater Than 100 and Whose Title is Either 'mongodb' or Written by 'john'
+
+db.books.find({
+    $and: [
+        { "LIKES": { $gt: 100 } },
+        { $or: [
+            { "TITLE": "mongodb" },
+            { "BY": "john" }
+        ]}
+    ]
+});
+
+
+Step 7: Delete the Document Titled 'nosql overview'
+
+db.books.deleteOne({ "TITLE": "nosql overview" });
+
+
+Step 8: Display the Second Document Published by 'john'
+
+To display the second document published by "john", you can use the skip() and limit() methods. Here’s how you can achieve that:
+
+db.books.find({ "BY": "john" }).skip(1).limit(1);
+
+
+
+Step 9: Update the Author of 'TOC' Book to 'Vivek Kulkarni'. If Record Does Not Exist, Create a New Document
+To handle this, you can use the upsert option in the update command. This will update the existing record if it exists or insert a new one if it doesn’t.
+
+db.books.updateOne(
+    { "TITLE": "TOC" }, 
+    { $set: { "BY": "Vivek Kulkarni" } },
+    { upsert: true }
+);
+
+
+
+Summary of Queries
+Create the collection – createCollection creates the collection explicitly, though MongoDB creates it automatically upon first insert.
+Insert documents – insertMany and insertOne are used for inserting multiple and single documents, respectively.
+Display documents based on title – Simple find queries to filter by title.
+Filter by likes and title – Combining $gt (greater than) with $or and $and for filtering.
+Delete a document – Use deleteOne to delete a document based on title.
+Display the second document by a specific author – skip(1) and limit(1) allow you to skip the first document and limit the result to one.
+Upsert functionality – Use upsert: true in the updateOne to either update or insert a new document.

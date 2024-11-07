@@ -1,0 +1,146 @@
+Consider the given Database Schema:
+employee (employee-name, street, city)
+works (employee-name, company-name, salary)
+company (company-name, city)
+manages (employee-name, manager-name)
+ Find the names of all employees who work for First Bank Corporation.
+ Find the names, street addresses, and cities of residence of all employees
+ who work for First Bank Corporation and earn more than $10,000.
+ Find all employees in the database who live in the same cities and on the
+ same streets as do their managers.
+ Find all employees in the database who earn more than each employee of Small
+Bank Corporation.
+ Find all employees who earn more than the average salary of all employees of
+their company.
+ Find the company that has the smallest payroll.
+
+
+
+Step 1: Create Tables
+
+
+CREATE TABLE employee (
+    employee_name VARCHAR(100),
+    street VARCHAR(100),
+    city VARCHAR(50),
+    PRIMARY KEY (employee_name)
+);
+
+CREATE TABLE works (
+    employee_name VARCHAR(100),
+    company_name VARCHAR(100),
+    salary DECIMAL(10, 2),
+    PRIMARY KEY (employee_name, company_name),
+    FOREIGN KEY (employee_name) REFERENCES employee(employee_name)
+);
+
+CREATE TABLE company (
+    company_name VARCHAR(100),
+    city VARCHAR(50),
+    PRIMARY KEY (company_name)
+);
+
+CREATE TABLE manages (
+    employee_name VARCHAR(100),
+    manager_name VARCHAR(100),
+    PRIMARY KEY (employee_name, manager_name),
+    FOREIGN KEY (employee_name) REFERENCES employee(employee_name),
+    FOREIGN KEY (manager_name) REFERENCES employee(employee_name)
+);
+
+
+
+Step 2: Insert Sample Data
+
+-- Insert data into employee table
+INSERT INTO employee (employee_name, street, city) VALUES
+('Amit Sharma', 'MG Road', 'Delhi'),
+('Ravi Kumar', 'Park Street', 'Kolkata'),
+('Meena Patel', 'Churchgate', 'Mumbai'),
+('John Doe', 'Baker Street', 'London'),
+('Rita Singh', 'Main Street', 'Mumbai'),
+('Sanjay Gupta', 'Lake Road', 'Delhi');
+
+-- Insert data into works table
+INSERT INTO works (employee_name, company_name, salary) VALUES
+('Amit Sharma', 'First Bank Corporation', 12000),
+('Ravi Kumar', 'First Bank Corporation', 9500),
+('Meena Patel', 'Small Bank Corporation', 8000),
+('John Doe', 'First Bank Corporation', 11000),
+('Rita Singh', 'Tech Solutions', 15000),
+('Sanjay Gupta', 'Small Bank Corporation', 7000);
+
+-- Insert data into company table
+INSERT INTO company (company_name, city) VALUES
+('First Bank Corporation', 'New York'),
+('Small Bank Corporation', 'San Francisco'),
+('Tech Solutions', 'Mumbai');
+
+-- Insert data into manages table
+INSERT INTO manages (employee_name, manager_name) VALUES
+('Amit Sharma', 'John Doe'),
+('Ravi Kumar', 'Amit Sharma'),
+('Meena Patel', 'Ravi Kumar'),
+('Rita Singh', 'John Doe'),
+('Sanjay Gupta', 'Meena Patel');
+
+
+Step 3: Solve the Queries
+
+Find the names of all employees who work for First Bank Corporation.
+
+SELECT employee_name
+FROM works
+WHERE company_name = 'First Bank Corporation';
+
+
+Find the names, street addresses, and cities of residence of all employees who work for First Bank Corporation and earn more than $10,000.
+
+SELECT e.employee_name, e.street, e.city
+FROM employee e
+JOIN works w ON e.employee_name = w.employee_name
+WHERE w.company_name = 'First Bank Corporation' AND w.salary > 10000;
+
+
+Find all employees in the database who live in the same cities and on the same streets as their managers.
+
+
+SELECT e.employee_name
+FROM employee e
+JOIN manages m ON e.employee_name = m.employee_name
+JOIN employee mgr ON m.manager_name = mgr.employee_name
+WHERE e.city = mgr.city AND e.street = mgr.street;
+
+
+Find all employees in the database who earn more than each employee of Small Bank Corporation.
+
+SELECT e.employee_name
+FROM works e
+WHERE e.salary > ALL (SELECT salary FROM works WHERE company_name = 'Small Bank Corporation');
+
+
+Find all employees who earn more than the average salary of all employees of their company.
+
+SELECT w.employee_name
+FROM works w
+JOIN (SELECT company_name, AVG(salary) AS avg_salary FROM works GROUP BY company_name) AS avg_salaries
+ON w.company_name = avg_salaries.company_name
+WHERE w.salary > avg_salaries.avg_salary;
+
+
+Find the company that has the smallest payroll.
+
+SELECT company_name
+FROM works
+GROUP BY company_name
+ORDER BY SUM(salary) ASC
+LIMIT 1;
+
+
+Explanation of Each Query
+The first query selects employees who work for "First Bank Corporation."
+The second query joins employee and works to find employee details for those who work for "First Bank Corporation" and earn over $10,000.
+The third query checks if an employee and their manager live in the same city and street.
+The fourth query finds employees who earn more than every employee of "Small Bank Corporation" using > ALL.
+The fifth query calculates the average salary for each company and selects employees earning above their company’s average.
+The sixth query calculates the total payroll per company, ordering by ascending payroll to find the company with the smallest payroll.

@@ -1,0 +1,86 @@
+Employee(employee_id, employee_name, City, Company_Name, Salary)
+11. Find details of all employees who work for company “IBM” and live in city “Pune”.
+12. Find names, and cities of all employees who work for “Infosys” or earn more than
+30000.
+13. Find all employees who are employees of “IBM” and not living in city “Mumbai”.
+14. Find company wise maximum salary.
+15. Find those companies whose employees earn higher salary, than average salary at
+“IBM”.
+
+
+Step 1: Create the Table
+
+CREATE TABLE Employee (
+    employee_id INT PRIMARY KEY,
+    employee_name VARCHAR(100),
+    city VARCHAR(50),
+    company_name VARCHAR(100),
+    salary DECIMAL(10, 2)
+);
+
+
+Step 2: Insert Sample Data
+
+INSERT INTO Employee (employee_id, employee_name, city, company_name, salary) VALUES
+(1, 'Amit Sharma', 'Pune', 'IBM', 32000),
+(2, 'Ravi Kumar', 'Mumbai', 'IBM', 28000),
+(3, 'Meena Patel', 'Bangalore', 'Infosys', 35000),
+(4, 'John Doe', 'Pune', 'Infosys', 29000),
+(5, 'Rita Singh', 'Pune', 'IBM', 31000),
+(6, 'Sanjay Gupta', 'Delhi', 'TCS', 45000),
+(7, 'Neha Desai', 'Pune', 'TCS', 27000),
+(8, 'Vikram Jain', 'Chennai', 'Infosys', 50000),
+(9, 'Priya Singh', 'Hyderabad', 'IBM', 34000),
+(10, 'Ramesh Yadav', 'Mumbai', 'Wipro', 33000),
+(11, 'Sneha Menon', 'Mumbai', 'Infosys', 36000);
+
+
+Step 3: Queries
+
+Find details of all employees who work for company “IBM” and live in city “Pune”.
+
+SELECT * 
+FROM Employee 
+WHERE company_name = 'IBM' AND city = 'Pune';
+
+
+Find names and cities of all employees who work for “Infosys” or earn more than 30000.
+
+SELECT employee_name, city 
+FROM Employee 
+WHERE company_name = 'Infosys' OR salary > 30000;
+
+
+Find all employees who are employees of “IBM” and not living in city “Mumbai”.
+
+SELECT * 
+FROM Employee 
+WHERE company_name = 'IBM' AND city != 'Mumbai';
+
+
+Find company-wise maximum salary.
+
+SELECT company_name, MAX(salary) AS max_salary
+FROM Employee
+GROUP BY company_name;
+
+
+Find those companies whose employees earn a higher salary, on average, than the average salary at “IBM”.
+
+
+SELECT company_name
+FROM Employee
+GROUP BY company_name
+HAVING AVG(salary) > (
+    SELECT AVG(salary) 
+    FROM Employee 
+    WHERE company_name = 'IBM'
+);
+
+
+Explanation of Queries
+The first query uses AND to filter employees who work at "IBM" and live in "Pune."
+The second query uses OR to select employees who either work at "Infosys" or have a salary above 30000.
+The third query selects employees who work at "IBM" but excludes those living in "Mumbai."
+The fourth query groups employees by company_name and retrieves the maximum salary for each company.
+The fifth query calculates the average salary for each company and filters to show only those with an average higher than "IBM"’s average salary.

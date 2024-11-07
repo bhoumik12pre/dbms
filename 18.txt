@@ -1,0 +1,157 @@
+Create the following schema
+Order(id,amount ,status)
+Cus id Amount Status
+A1 400 P
+B1 300 D
+A1 200 F
+C1 200 F
+B1 700 P
+B1 800 P
+ Status: P=”Pending”, D= “Delivered”, F= “Failed”
+ Implement the following using Map Reduce function
+1. Find the sum of amount of each customer whose status is P
+2. Find the average amount of each customer
+3. Find the min amount of each customer
+4. Find the max amount of each customer whose status is F
+
+
+Step 1: Create the Order Collection and Insert Data
+
+use shop;  // Switch to 'shop' database or create it if it doesn't exist.
+
+db.createCollection("orders");  // Explicitly create the collection
+
+// Insert the sample data
+db.orders.insertMany([
+    { "id": "A1", "amount": 400, "status": "P" },
+    { "id": "B1", "amount": 300, "status": "D" },
+    { "id": "A1", "amount": 200, "status": "F" },
+    { "id": "C1", "amount": 200, "status": "F" },
+    { "id": "B1", "amount": 700, "status": "P" },
+    { "id": "B1", "amount": 800, "status": "P" }
+]);
+
+
+Step 2: Implement MapReduce Functions
+
+1. Find the sum of the amount of each customer whose status is "P" (Pending)
+We will create a MapReduce function that sums the amounts for each customer whose status is "P".
+
+// Map function to filter out documents with status "P" and sum amounts
+var mapSum = function() {
+    if (this.status === "P") {
+        emit(this.id, this.amount);  // Emit customer ID as the key and the amount as the value
+    }
+};
+
+// Reduce function to sum the amounts for each customer
+var reduceSum = function(key, values) {
+    return Array.sum(values);  // Sum all the amounts for each customer
+};
+
+// Run the MapReduce job
+db.orders.mapReduce(mapSum, reduceSum, { out: "sum_by_customer_p" });
+
+// Display the results
+db.sum_by_customer_p.find();
+
+
+2. Find the average amount of each customer
+We will create a MapReduce function to calculate the average amount for each customer.
+
+// Map function to emit customer ID and amount
+var mapAvg = function() {
+    emit(this.id, { count: 1, totalAmount: this.amount });  // Emit customer ID with a count and amount
+};
+
+// Reduce function to calculate total count and total amount for each customer
+var reduceAvg = function(key, values) {
+    var result = { count: 0, totalAmount: 0 };
+    values.forEach(function(value) {
+        result.count += value.count;
+        result.totalAmount += value.totalAmount;
+    });
+    return result;
+};
+
+// Finalizer function to calculate average
+var finalizeAvg = function(key, reducedValue) {
+    reducedValue.avgAmount = reducedValue.totalAmount / reducedValue.count;
+    return reducedValue;
+};
+
+// Run the MapReduce job
+db.orders.mapReduce(mapAvg, reduceAvg, { out: "avg_by_customer", finalize: finalizeAvg });
+
+// Display the results
+db.avg_by_customer.find();
+
+
+3. Find the minimum amount of each customer
+We will create a MapReduce function that calculates the minimum amount for each customer.
+
+// Map function to emit customer ID and amount
+var mapMin = function() {
+    emit(this.id, this.amount);  // Emit customer ID and amount
+};
+
+// Reduce function to calculate the minimum amount for each customer
+var reduceMin = function(key, values) {
+    return Math.min.apply(null, values);  // Find the minimum value from the array of amounts
+};
+
+// Run the MapReduce job
+db.orders.mapReduce(mapMin, reduceMin, { out: "min_by_customer" });
+
+// Display the results
+db.min_by_customer.find();
+
+
+4. Find the maximum amount of each customer whose status is "F" (Failed)
+
+// Map function to filter out documents with status "F" and emit the amount
+var mapMax = function() {
+    if (this.status === "F") {
+        emit(this.id, this.amount);  // Emit customer ID and amount
+    }
+};
+
+// Reduce function to calculate the maximum amount for each customer
+var reduceMax = function(key, values) {
+    return Math.max.apply(null, values);  // Find the maximum value from the array of amounts
+};
+
+// Run the MapReduce job
+db.orders.mapReduce(mapMax, reduceMax, { out: "max_by_customer_f" });
+
+// Display the results
+db.max_by_customer_f.find();
+
+
+Summary of Queries
+Sum of Amounts (Pending Status): The mapReduce function filters out the orders with "P" status and sums the amount for each customer.
+Average Amount for Each Customer: This function calculates the total amount and count of orders for each customer and computes the average.
+Minimum Amount for Each Customer: The mapReduce function calculates the minimum order amount for each customer.
+Maximum Amount for Each Customer (Failed Status): This function calculates the maximum order amount for each customer with a "F" status.
+Step 3: Review the Results
+After running the MapReduce functions, you can check the results of each aggregation in their respective collections:
+
+sum_by_customer_p: Contains the sum of amounts for customers with a status of "P".
+avg_by_customer: Contains the average amount for each customer.
+min_by_customer: Contains the minimum amount for each customer.
+max_by_customer_f: Contains the maximum amount for customers with a status of "F".
+
+
+You can check the results with the following commands:
+
+// View the results for the sum of amounts
+db.sum_by_customer_p.find();
+
+// View the results for the average amount
+db.avg_by_customer.find();
+
+// View the results for the minimum amount
+db.min_by_customer.find();
+
+// View the results for the maximum amount (status "F")
+db.max_by_customer_f.find();

@@ -1,0 +1,98 @@
+Create a Library database with the schema
+Books(AccNo,Title,Author,Publisher,Count).
+ Create a table Library_Audit with same fields as of Books.
+ Create a before trigger to insert records into Librry_Audit table if there is deletion
+in Books table.
+ Create a after trigger to insert records into Librry_Audit table if there is updation
+in Books table.
+
+
+Step 1: Create the Books Table
+
+CREATE TABLE Books (
+    AccNo INT PRIMARY KEY,
+    Title VARCHAR(255),
+    Author VARCHAR(255),
+    Publisher VARCHAR(255),
+    Count INT
+);
+
+
+Step 2: Create the Library_Audit Table
+
+CREATE TABLE Library_Audit (
+    AccNo INT,
+    Title VARCHAR(255),
+    Author VARCHAR(255),
+    Publisher VARCHAR(255),
+    Count INT,
+    Action_Type VARCHAR(50),  -- To store the action type, e.g., 'Deleted' or 'Updated'
+    Action_Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- To store the date and time of the action
+);
+
+
+Step 3: Create the BEFORE DELETE Trigger
+This trigger will insert records into Library_Audit before any record is deleted from the Books table.
+
+DELIMITER //
+
+CREATE TRIGGER before_delete_books
+BEFORE DELETE ON Books
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count, Action_Type)
+    VALUES (OLD.AccNo, OLD.Title, OLD.Author, OLD.Publisher, OLD.Count, 'Deleted');
+END //
+
+DELIMITER ;
+
+
+Step 4: Create the AFTER UPDATE Trigger
+This trigger will insert records into Library_Audit after any record is updated in the Books table.
+
+DELIMITER //
+
+CREATE TRIGGER after_update_books
+AFTER UPDATE ON Books
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count, Action_Type)
+    VALUES (NEW.AccNo, NEW.Title, NEW.Author, NEW.Publisher, NEW.Count, 'Updated');
+END //
+
+DELIMITER ;
+
+
+
+Explanation of the Triggers
+BEFORE DELETE Trigger (before_delete_books):
+
+This trigger executes before a row is deleted from the Books table.
+It uses the OLD keyword to access the values of the row that is about to be deleted.
+It inserts these values into the Library_Audit table with the Action_Type set to 'Deleted'.
+AFTER UPDATE Trigger (after_update_books):
+
+This trigger executes after a row is updated in the Books table.
+It uses the NEW keyword to access the values of the row after the update.
+It inserts these updated values into the Library_Audit table with the Action_Type set to 'Updated'.
+
+
+
+Step 5: Test the Triggers
+To test the triggers, perform some DELETE and UPDATE operations on the Books table.
+
+-- Sample data for Books table
+INSERT INTO Books (AccNo, Title, Author, Publisher, Count) VALUES
+(1, 'The Alchemist', 'Paulo Coelho', 'HarperOne', 5),
+(2, '1984', 'George Orwell', 'Secker & Warburg', 3),
+(3, 'To Kill a Mockingbird', 'Harper Lee', 'J.B. Lippincott & Co.', 4);
+
+-- Delete a record to test the BEFORE DELETE trigger
+DELETE FROM Books WHERE AccNo = 1;
+
+-- Update a record to test the AFTER UPDATE trigger
+UPDATE Books SET Count = 2 WHERE AccNo = 2;
+
+-- Verify the records in Library_Audit
+SELECT * FROM Library_Audit;
+

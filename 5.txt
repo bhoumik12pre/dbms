@@ -1,0 +1,107 @@
+Write a Stored Procedure namely proc_Grade for the categorization of student. If marks
+scored by students in examination is <=1500 and marks>=990 then student will be placed
+in distinction category if marks scored are between 989 and900 category is first class, if
+marks 899 and 825 category is Higher Second Class. Consider below tables
+1.Stud_Marks (name, total_marks) 2. Result (Roll,Name, Class)
+
+
+Step 1: Create Tables
+
+CREATE TABLE Stud_Marks (
+    Roll INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Total_Marks INT
+);
+
+CREATE TABLE Result (
+    Roll INT,
+    Name VARCHAR(50),
+    Class VARCHAR(20),
+    PRIMARY KEY (Roll)
+);
+
+
+Step 2: Insert Sample Data
+Insert sample data into the Stud_Marks table to use with the procedure.
+
+INSERT INTO Stud_Marks (Roll, Name, Total_Marks) VALUES
+INSERT INTO Stud_Marks (Roll, Name, Total_Marks) VALUES
+(101, 'Aman Kumar', 1450),      -- Distinction
+(102, 'Neha Sharma', 980),      -- First Class
+(103, 'Rajesh Singh', 875),     -- Higher Second Class
+(104, 'Sita Patel', 930),       -- First Class
+(105, 'Ravi Verma', 1600),      -- Not Classified (above Distinction range)
+(106, 'Pooja Joshi', 1200),     -- Distinction
+(107, 'Vikram Chawla', 850),    -- Higher Second Class
+(108, 'Anita Desai', 1500),     -- Distinction (boundary value)
+(109, 'Rohan Gupta', 910),      -- First Class
+(110, 'Lakshmi Nair', 820);     -- Not Classified (below Higher Second Class)
+
+
+
+Step 3: Create Stored Procedure proc_Grade
+Now, create the stored procedure to categorize students based on their Total_Marks and insert their classification into the Result table.
+
+
+DELIMITER //
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    DECLARE v_Class VARCHAR(20);
+    DECLARE v_Roll INT;
+    DECLARE v_Name VARCHAR(50);
+    DECLARE v_Total_Marks INT;
+    DECLARE done INT DEFAULT FALSE;
+
+    -- Cursor to loop through each student's marks
+    DECLARE cur CURSOR FOR 
+        SELECT Roll, Name, Total_Marks FROM Stud_Marks;
+        
+    -- Handler for the end of the cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+    
+    -- Loop through each student in the cursor
+    cur_loop: LOOP
+        -- Fetch data from cursor
+        FETCH cur INTO v_Roll, v_Name, v_Total_Marks;
+        
+        -- Exit loop if no more rows
+        IF done THEN
+            LEAVE cur_loop;
+        END IF;
+        
+        -- Determine the class based on total marks
+        IF v_Total_Marks >= 990 AND v_Total_Marks <= 1500 THEN
+            SET v_Class = 'Distinction';
+        ELSEIF v_Total_Marks >= 900 AND v_Total_Marks <= 989 THEN
+            SET v_Class = 'First Class';
+        ELSEIF v_Total_Marks >= 825 AND v_Total_Marks <= 899 THEN
+            SET v_Class = 'Higher Second Class';
+        ELSE
+            SET v_Class = 'Not Classified';
+        END IF;
+        
+        -- Insert the result into the Result table
+        INSERT INTO Result (Roll, Name, Class) 
+        VALUES (v_Roll, v_Name, v_Class)
+        ON DUPLICATE KEY UPDATE Class = v_Class;
+    END LOOP;
+    
+    CLOSE cur;
+END //
+
+DELIMITER ;
+
+
+
+Testing the Procedure
+
+
+CALL proc_Grade();
+
+
+SELECT * FROM Result;
+
+
